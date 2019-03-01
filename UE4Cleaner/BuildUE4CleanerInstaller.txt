@@ -1,0 +1,2 @@
+candle.exe UE4CleanerInstaller.xml
+light.exe -ext WixUIExtension UE4CleanerInstaller.wixobj

@@ -40,4 +40,9 @@
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="UE4CleanerInstaller.xml">
+      <Filter>Source Files</Filter>
+    </Xml>
+  </ItemGroup>
 </Project>

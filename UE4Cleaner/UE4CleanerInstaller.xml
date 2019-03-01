@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='windows-1252'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+  <Product Name='UE4 Cleaner' Manufacturer='Vaei'
+      Id='BFC660AE-F155-4428-8819-35AE5353EE57'
+      UpgradeCode='E1AB4DD6-4239-4FD7-ACB4-11E8EF6FCC83'
+      Language='1033' Codepage='1252' Version='1.0.0'>
+    <Package Id='*' Keywords='UE4 Cleaner Installer'
+        Description="Vaei's UE4 Cleaner Installer"
+        Manufacturer='Vaei'
+        InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
+    
+    <Media Id='1' Cabinet='Cleaner.cab' EmbedCab='yes'/>
+    
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+      <Directory Id='ProgramFilesFolder' Name='PFiles'>
+        <Directory Id='Vaei' Name='Vaei'>
+          <Directory Id='INSTALLDIR' Name='UE4Cleaner'>
+            <Component Id='MainExecutable' Guid='86284D74-B785-4067-BEC7-789869379615'>
+              <File Id='UE4CleanerEXE' Name='UE4Cleaner.exe' Source='UE4Cleaner.exe' KeyPath='yes'></File>
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <DirectoryRef Id='TARGETDIR'>
+      <Component Id='RegistryEntries' Guid='5710636A-B56E-42AA-97F2-5D44ABF713CE'>
+        <RegistryKey Root='HKCR' Key='Unreal.ProjectFile\shell\ue4cleaner' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
+          <RegistryValue Type='string' Value='Clean and Generate Project'/>
+          <RegistryValue Type='string' Name='Icon' Value='"[INSTALLDIR]UE4Cleaner.exe"'/>
+          <RegistryKey Key='command' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
+            <RegistryValue Type='string' Value='"[INSTALLDIR]UE4Cleaner.exe" /plugins "%1"'/>
+          </RegistryKey>
+        </RegistryKey>
+        <RegistryKey Root='HKCR' Key='Unreal.ProjectFile\shell\ue4cleaner-projectonly' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
+          <RegistryValue Type='string' Value='Clean and Generate Project (Ignore Plugins)'/>
+          <RegistryValue Type='string' Name='Icon' Value='"[INSTALLDIR]UE4Cleaner.exe"'/>
+          <RegistryKey Key='command' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
+            <RegistryValue Type='string' Value='"[INSTALLDIR]UE4Cleaner.exe" "%1"'/>
+          </RegistryKey>
+        </RegistryKey>
+      </Component>
+    </DirectoryRef>
+    
+    <Feature Id='MainProgram' Title='UE4Cleaner' Level='1' AllowAdvertise='no' Absent='disallow'>
+      <ComponentRef Id='MainExecutable'/>
+    </Feature>
+    <Feature Id='RegistryKeys' Title='RegistryKeys' Level='1' AllowAdvertise='no' Absent='disallow'>
+      <ComponentRef Id='RegistryEntries'/>
+    </Feature>
+    
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+    
+    <UI>
+      <UIRef Id="WixUI_InstallDir" />
+      <Publish Dialog="WelcomeDlg"
+            Control="Next"
+            Event="NewDialog"
+            Value="InstallDirDlg"
+            Order="2">1</Publish>
+      <Publish Dialog="InstallDirDlg"
+            Control="Back"
+            Event="NewDialog"
+            Value="WelcomeDlg"
+            Order="2">1</Publish>
+    </UI>
+
+    <Icon Id='UE4CleanerIcon' SourceFile='UE4Cleaner.exe'/>
+    <Property Id='ARPPRODUCTICON' Value='UE4CleanerIcon'/>
+
+  </Product>
+</Wix>
+      
+        

@@ -1,3 +1,4 @@
+// Copyright (c) 2019 Jared Taylor / Vaei. All Rights Reserved.
 // UE4Cleaner.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 

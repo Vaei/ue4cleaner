@@ -171,6 +171,9 @@
   <ItemGroup>
     <Image Include="..\..\..\Downloads\iconsext\icons\MainIcon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="UE4CleanerInstaller.xml" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
