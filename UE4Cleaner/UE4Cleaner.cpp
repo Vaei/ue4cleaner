@@ -1,0 +1,274 @@
+// UE4Cleaner.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+
+#include "pch.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <windows.h>
+#include <filesystem>
+
+using namespace std;
+namespace fs = std::filesystem;
+
+bool StringStartsWith(const string& inString, const string& startsWith)
+{
+	return (inString.compare(0, startsWith.length(), startsWith) == 0);
+}
+
+bool StringEndsWith(const string& inString, const string& endsWith)
+{
+	return (inString.compare(inString.length() - endsWith.length(), endsWith.length(), endsWith) == 0);
+}
+
+void StringRemove(string& inString, const string& delimiter)
+{
+	inString = inString.erase(0, inString.find(delimiter) + delimiter.length());
+}
+
+string StringReplaceAll(std::string str, const std::string& from, const std::string& to)
+{
+	size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+	{
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+	}
+	return str;
+}
+
+wstring s2ws(const string& str)
+{
+	if (str.empty()) return std::wstring();
+	int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+	std::wstring wstrTo(size_needed, 0);
+	MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+	return wstrTo;
+}
+
+string ws2s(const std::wstring& wstr)
+{
+	if (wstr.empty()) return std::string();
+	int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+	std::string strTo(size_needed, 0);
+	WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
+	return strTo;
+}
+
+int FatalError(const string& errorString, const int errorId)
+{
+	const char *errorChar = errorString.c_str();
+	cout << "[Fatal] " << errorChar << ". Exiting with error code: " << to_string(errorId) << endl;
+	return errorId;
+}
+
+wstring ReadRegValue(HKEY root, wstring key, wstring name)
+{
+	HKEY hKey;
+	if (RegOpenKeyEx(root, key.c_str(), 0, KEY_READ, &hKey) != ERROR_SUCCESS)
+		throw "Could not open registry key";
+
+	DWORD type;
+	DWORD cbData;
+	if (RegQueryValueEx(hKey, name.c_str(), NULL, &type, NULL, &cbData) != ERROR_SUCCESS)
+	{
+		RegCloseKey(hKey);
+		throw "Could not read registry value";
+	}
+
+	if (type != REG_SZ)
+	{
+		RegCloseKey(hKey);
+		throw "Incorrect registry value type";
+	}
+
+	wstring value(cbData / sizeof(wchar_t), L'\0');
+	if (RegQueryValueEx(hKey, name.c_str(), NULL, NULL, reinterpret_cast<LPBYTE>(&value[0]), &cbData) != ERROR_SUCCESS)
+	{
+		RegCloseKey(hKey);
+		throw "Could not read registry value";
+	}
+
+	RegCloseKey(hKey);
+
+	size_t firstNull = value.find_first_of(L'\0');
+	if (firstNull != string::npos)
+		value.resize(firstNull);
+
+	return value;
+}
+
+/**
+ * return: number of files or directories deleted
+ */
+uintmax_t delete_directory(const string& path)
+{
+	fs::path dir = path;
+	return fs::remove_all(path);
+}
+
+int main(int argc, char* argv[])
+{
+	static const wstring regPath = s2ws("Software\\Epic Games\\Unreal Engine\\Builds");
+	static const int requiredArgs = 3;  // first arg is name of program itself, other two is the path and the option of also rebuilding plugins
+
+	// Make sure the required args have been passed
+	if (argc < requiredArgs)
+	{
+		return FatalError("Insufficient args", 1000);
+	}
+
+	fs::path path = "";
+	bool plugins = false;
+
+	bool plugin_find_fail = true;  // Can't simply test the value for a bool
+
+	// Parse the arguments to find the values
+	for (int i = 1; i < argc; i++)
+	{
+		string arg(argv[i]);
+		// Path arg
+		if (StringStartsWith(arg, "path="))
+		{
+			StringRemove(arg, "path=");
+			path = arg;
+		}
+		// Plugins arg
+		else if (StringStartsWith(arg, "plugins="))
+		{
+			StringRemove(arg, "plugins=");
+			if (StringStartsWith(arg, "true"))
+			{
+				plugins = true;
+				plugin_find_fail = false;
+			}
+			else if (StringStartsWith(arg, "false"))
+			{
+				plugins = false;
+				plugin_find_fail = false;
+			}
+			else 
+			{
+				return FatalError("Invalid argument for plugins", 998);
+			}
+		}
+	}
+
+	// Validate args
+	if (path.string().length() == 0)
+	{
+		return FatalError("No path provided", 997);
+	}
+
+	if (plugin_find_fail)
+	{
+		return FatalError("No plugins arg specified", 996);
+	}
+
+	// Check the directory exists
+	if (fs::exists(path))
+	{
+		// Delete the binaries, intermediate, sln in the project root
+		{
+			fs::path path_binaries = path.string() + "\\binaries";
+			fs::path path_intermediate = path.string() + "\\intermediate";
+			if (fs::exists(path_binaries))
+			{
+				fs::remove_all(path_binaries);
+			}
+			if (fs::exists(path_intermediate))
+			{
+				fs::remove_all(path_intermediate);
+			}
+
+			for (const auto& entry : fs::directory_iterator(path))
+			{
+				if (StringEndsWith(entry.path().string(), ".sln"))
+				{
+					fs::remove_all(entry.path());
+					break;
+				}
+			}
+		}
+
+		// Delete the binaries and intermediate for each plugin (if set)
+		if (plugins)
+		{
+			fs::path path_plugins = path.string() + "\\plugins";
+			if (fs::exists(path_plugins))
+			{
+				for (const auto& entry : fs::directory_iterator(path_plugins))
+				{
+					if(fs::is_directory(entry.path()))
+					{
+						fs::path path_binaries =  entry.path().string() + "\\binaries";
+						fs::path path_intermediate = entry.path().string() + "\\intermediate";
+						if (fs::exists(path_binaries))
+						{
+							fs::remove_all(path_binaries);
+						}
+						if (fs::exists(path_intermediate))
+						{
+							fs::remove_all(path_intermediate);
+						}
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		return FatalError("path does not exist", 995);
+	}
+
+	// Generate project files...
+	for (const auto& entry : fs::directory_iterator(path))
+	{
+		// Locate the .uproject
+		if (StringEndsWith(entry.path().string(), ".uproject"))
+		{
+			ifstream filestream(entry.path().string());
+			string line;
+			// Read through each line in the uproject file to locate the Engine
+			while (getline(filestream, line))
+			{
+				istringstream iss(line);
+				string key, value;
+				iss >> key >> value;
+				if (StringStartsWith(key, "\"EngineAssociation\":"))
+				{
+					// Remove ""
+					value.erase(value.length() - 2, 2);
+					value.erase(0, 1);
+
+					wstring regVal = ReadRegValue(HKEY_CURRENT_USER, regPath, s2ws(value));
+					if (regVal.length() > 0)
+					{
+
+					}
+						
+					break;
+				}
+			}
+			break;
+		}
+	}
+
+	for (const auto& entry : fs::directory_iterator(path))
+	{
+		// Locate the .uproject
+		if (StringEndsWith(entry.path().string(), ".uproject"))
+		{
+			system("setlocal");
+			wstring regVal2 = ReadRegValue(HKEY_CLASSES_ROOT, s2ws("Unreal.ProjectFile\\shell\\rungenproj"), s2ws("Icon"));
+
+			string sysCmd = "\"" + ws2s(regVal2);
+			sysCmd += " /projectfiles";
+			sysCmd += " \"" + entry.path().string() + "\"";
+			sysCmd += "\"";
+
+			system(sysCmd.c_str());
+		}
+	}
+}
