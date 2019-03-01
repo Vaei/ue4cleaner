@@ -110,6 +110,9 @@ uintmax_t delete_directory(const string& path)
 
 int main(int argc, char* argv[])
 {
+	TCHAR pwd[MAX_PATH];
+	GetCurrentDirectory(MAX_PATH, pwd);
+
 	static const wstring regPath = s2ws("Software\\Epic Games\\Unreal Engine\\Builds");
 	static const int requiredArgs = 3;  // first arg is name of program itself, other two is the path and the option of also rebuilding plugins
 
@@ -223,38 +226,6 @@ int main(int argc, char* argv[])
 	}
 
 	// Generate project files...
-	for (const auto& entry : fs::directory_iterator(path))
-	{
-		// Locate the .uproject
-		if (StringEndsWith(entry.path().string(), ".uproject"))
-		{
-			ifstream filestream(entry.path().string());
-			string line;
-			// Read through each line in the uproject file to locate the Engine
-			while (getline(filestream, line))
-			{
-				istringstream iss(line);
-				string key, value;
-				iss >> key >> value;
-				if (StringStartsWith(key, "\"EngineAssociation\":"))
-				{
-					// Remove ""
-					value.erase(value.length() - 2, 2);
-					value.erase(0, 1);
-
-					wstring regVal = ReadRegValue(HKEY_CURRENT_USER, regPath, s2ws(value));
-					if (regVal.length() > 0)
-					{
-
-					}
-						
-					break;
-				}
-			}
-			break;
-		}
-	}
-
 	for (const auto& entry : fs::directory_iterator(path))
 	{
 		// Locate the .uproject
