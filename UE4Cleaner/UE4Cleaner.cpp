@@ -113,60 +113,25 @@ int main(int argc, char* argv[])
 	TCHAR pwd[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, pwd);
 
-	static const wstring regPath = s2ws("Software\\Epic Games\\Unreal Engine\\Builds");
-	static const int requiredArgs = 3;  // first arg is name of program itself, other two is the path and the option of also rebuilding plugins
+	static const wstring regPath = s2ws("Software\\Epic Games\\Unreal Engine\\Builds");  // Path to registry entry used by UE4 when generating project files
 
-	// Make sure the required args have been passed
-	if (argc < requiredArgs)
-	{
-		return FatalError("Insufficient args", 1000);
-	}
-
-	fs::path path = "";
+	fs::path path = pwd;
 	bool plugins = false;
 
-	bool plugin_find_fail = true;  // Can't simply test the value for a bool
-
-	// Parse the arguments to find the values
-	for (int i = 1; i < argc; i++)
+	// Check if plugins flag is set
+	if (argc > 1)  // First is application name
 	{
-		string arg(argv[i]);
-		// Path arg
-		if (StringStartsWith(arg, "path="))
+		string plugins_arg = argv[1];
+		if (plugins_arg == "/plugins")
 		{
-			StringRemove(arg, "path=");
-			path = arg;
-		}
-		// Plugins arg
-		else if (StringStartsWith(arg, "plugins="))
-		{
-			StringRemove(arg, "plugins=");
-			if (StringStartsWith(arg, "true"))
-			{
-				plugins = true;
-				plugin_find_fail = false;
-			}
-			else if (StringStartsWith(arg, "false"))
-			{
-				plugins = false;
-				plugin_find_fail = false;
-			}
-			else 
-			{
-				return FatalError("Invalid argument for plugins", 998);
-			}
+			plugins = true;
 		}
 	}
 
 	// Validate args
 	if (path.string().length() == 0)
 	{
-		return FatalError("No path provided", 997);
-	}
-
-	if (plugin_find_fail)
-	{
-		return FatalError("No plugins arg specified", 996);
+		return FatalError("Invalid path", 997);
 	}
 
 	// Check the directory exists
