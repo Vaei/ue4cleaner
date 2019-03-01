@@ -1,5 +1,5 @@
 # ue4cleaner
-Adds two options to the explorer context menu for .uproject for deleting Intermediate and Binaries the .sln. Then generates new project files.
+Adds two options to the explorer context menu for .uproject for deleting Intermediate/Binaries/.sln. Then generates new project files.
 
 ## Installation
 To install, grab the latest precompiled binary from https://github.com/Vaei/ue4cleaner/tree/master/Binaries
