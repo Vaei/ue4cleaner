@@ -5,6 +5,8 @@ Adds two options to the explorer context menu for .uproject for deleting Interme
 To install, grab the latest precompiled binary from https://github.com/Vaei/ue4cleaner/tree/master/Binaries
 Then run the MSI installer.
 
+This needs to be reinstalled (repair installation) quite frequently due to a limitation between how windows handles extension registration and UE4 constantly re-writing the registry. I keep an installer shortcut on my desktop and spam spacebar anytime the options disappear :)
+
 Currently tested on Windows 10 only. Linux/OSX unsupported.
 
 ## Compiling Source & Generating Binaries
