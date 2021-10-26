@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='windows-1252'?>
+<?xml version='1.0' encoding='Windows-1252'?>
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
   <Product Name='UE4 Cleaner' Manufacturer='Vaei'
       Id='BFC660AE-F155-4428-8819-35AE5353EE57'
@@ -25,27 +25,41 @@
 
     <DirectoryRef Id='TARGETDIR'>
       <Component Id='RegistryEntries' Guid='5710636A-B56E-42AA-97F2-5D44ABF713CE'>
-        <RegistryKey Root='HKCR' Key='Unreal.ProjectFile\shell\ue4cleaner' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
+        <RegistryKey Root='HKCR' Key='Unreal.ProjectFile\shell\ue4cleaner-clean-generate' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
           <RegistryValue Type='string' Value='Clean and generate project files'/>
           <RegistryValue Type='string' Name='Icon' Value='"[INSTALLDIR]UE4Cleaner.exe"'/>
           <RegistryKey Key='command' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
             <RegistryValue Type='string' Value='"[INSTALLDIR]UE4Cleaner.exe" /plugins "%1"'/>
           </RegistryKey>
         </RegistryKey>
-        <RegistryKey Root='HKCR' Key='Unreal.ProjectFile\shell\ue4cleaner-projectonly' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
+        <RegistryKey Root='HKCR' Key='Unreal.ProjectFile\shell\ue4cleaner-clean-generate-projectonly' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
           <RegistryValue Type='string' Value='Clean and generate project files (Ignore plugins)'/>
           <RegistryValue Type='string' Name='Icon' Value='"[INSTALLDIR]UE4Cleaner.exe"'/>
           <RegistryKey Key='command' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
             <RegistryValue Type='string' Value='"[INSTALLDIR]UE4Cleaner.exe" "%1"'/>
           </RegistryKey>
         </RegistryKey>
+        <!--<RegistryKey Root='HKCR' Key='Unreal.ProjectFile\shell\ue4cleaner-clean' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
+          <RegistryValue Type='string' Value='Clean project'/>
+          <RegistryValue Type='string' Name='Icon' Value='"[INSTALLDIR]UE4Cleaner.exe"'/>
+          <RegistryKey Key='command' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
+            <RegistryValue Type='string' Value='"[INSTALLDIR]UE4Cleaner.exe" /plugins /clean "%1"'/>
+          </RegistryKey>
+        </RegistryKey>
+        <RegistryKey Root='HKCR' Key='Unreal.ProjectFile\shell\ue4cleaner-clean-projectonly' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
+          <RegistryValue Type='string' Value='Clean project (Ignore plugins)'/>
+          <RegistryValue Type='string' Name='Icon' Value='"[INSTALLDIR]UE4Cleaner.exe"'/>
+          <RegistryKey Key='command' ForceCreateOnInstall='yes' ForceDeleteOnUninstall='yes'>
+            <RegistryValue Type='string' Value='"[INSTALLDIR]UE4Cleaner.exe" /clean "%1"'/>
+          </RegistryKey>
+        </RegistryKey>-->
       </Component>
     </DirectoryRef>
     
     <Feature Id='MainProgram' Title='UE4Cleaner' Level='1' AllowAdvertise='no' Absent='disallow'>
       <ComponentRef Id='MainExecutable'/>
-    </Feature>
-    <Feature Id='RegistryKeys' Title='RegistryKeys' Level='1' AllowAdvertise='no' Absent='disallow'>
+    <!--</Feature>
+    <Feature Id='RegistryKeys' Title='RegistryKeys' Level='1' AllowAdvertise='no' Absent='disallow'>-->
       <ComponentRef Id='RegistryEntries'/>
     </Feature>
     

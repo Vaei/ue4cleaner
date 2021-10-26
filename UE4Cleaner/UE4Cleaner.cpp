@@ -117,15 +117,22 @@ int main(int argc, char* argv[])
 	static const wstring regPath = s2ws("Software\\Epic Games\\Unreal Engine\\Builds");  // Path to registry entry used by UE4 when generating project files
 
 	fs::path path = pwd;
+	bool cleanonly = false;
 	bool plugins = false;
 
-	// Check if plugins flag is set
+	// Check if plugins flag is set or if we want to skip generation
 	if (argc > 1)  // First is application name
 	{
-		string plugins_arg = argv[1];
-		if (plugins_arg == "/plugins")
+		for (int i = 1; i < argc; i++)
 		{
-			plugins = true;
+			if (argv[i] == "/plugins")
+			{
+				plugins = true;
+			}
+			else if (argv[i] == "/clean")
+			{
+				cleanonly = true;
+			}
 		}
 	}
 
@@ -192,20 +199,23 @@ int main(int argc, char* argv[])
 	}
 
 	// Generate project files...
-	for (const auto& entry : fs::directory_iterator(path))
+	if (!cleanonly)
 	{
-		// Locate the .uproject
-		if (StringEndsWith(entry.path().string(), ".uproject"))
+		for (const auto& entry : fs::directory_iterator(path))
 		{
-			system("setlocal");
-			wstring regVal2 = ReadRegValue(HKEY_CLASSES_ROOT, s2ws("Unreal.ProjectFile\\shell\\rungenproj"), s2ws("Icon"));
+			// Locate the .uproject
+			if (StringEndsWith(entry.path().string(), ".uproject"))
+			{
+				system("setlocal");
+				wstring regVal2 = ReadRegValue(HKEY_CLASSES_ROOT, s2ws("Unreal.ProjectFile\\shell\\rungenproj"), s2ws("Icon"));
 
-			string sysCmd = "\"" + ws2s(regVal2);
-			sysCmd += " /projectfiles";
-			sysCmd += " \"" + entry.path().string() + "\"";
-			sysCmd += "\"";
+				string sysCmd = "\"" + ws2s(regVal2);
+				sysCmd += " /projectfiles";
+				sysCmd += " \"" + entry.path().string() + "\"";
+				sysCmd += "\"";
 
-			system(sysCmd.c_str());
+				system(sysCmd.c_str());
+			}
 		}
 	}
 }
