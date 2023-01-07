@@ -169,7 +169,7 @@
     <ResourceCompile Include="UE4Cleaner.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\Downloads\iconsext\icons\MainIcon.ico" />
+    <Image Include="MainIcon.ico" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UE4CleanerInstaller.xml" />
