@@ -15,7 +15,7 @@ If you can use a precompiled binary, do that instead. If you want to make change
 To modify the source, simply open in Visual Studio 2017.
 
 ### Installer
-WiX installer is used. Grab it here http://wixtoolset.org/releases/
+WiX installer is used. Grab it here https://wixtoolset.org/docs/intro/#nettool
 WiX is used to add registry keys for the context menu and generate a convenient .msi that will install to a specified location as well as handling registration with the windows installer service (it will be in add/remove programs).
 
 #### Usage
